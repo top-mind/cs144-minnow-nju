@@ -18,7 +18,7 @@ void Writer::push( string data )
   if ( push == 0 )
     return;
 
-  datas_.push( data.substr( 0, push ) );
+  datas_.push( push == data.size() ? std::move(data) : data.substr( 0, push ) );
 
   if ( size_ == 0 )
     peek_view_ = datas_.back();

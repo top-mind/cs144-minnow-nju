@@ -2,6 +2,15 @@
 
 using namespace std;
 
+
+/* Reassembler
+ * |<-readed zone->|<-ByteStream->|<-Reassembler->|
+ *                  <-         capacity         ->
+ * |<-Reassembler->|
+ * = (<unknown><known>)*<unknown>?
+ *
+ */
+
 void Reassembler::insert( uint64_t first_index, string data, bool is_last_substring )
 {
   // Your code here.
