@@ -28,6 +28,10 @@ public:
   Wrap32 operator+( uint32_t n ) const { return Wrap32 { raw_value_ + n }; }
   bool operator==( const Wrap32& other ) const { return raw_value_ == other.raw_value_; }
 
+  bool operator <= (const Wrap32& other) const {
+    return (other.raw_value_ - raw_value_) <= UINT32_MAX / 2;
+  }
+
 protected:
   uint32_t raw_value_ {};
 };
