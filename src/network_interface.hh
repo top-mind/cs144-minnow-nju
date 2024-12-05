@@ -1,8 +1,10 @@
 #pragma once
 
 #include <queue>
+#include <unordered_map>
 
 #include "address.hh"
+#include "arp_message.hh"
 #include "ethernet_frame.hh"
 #include "ipv4_datagram.hh"
 
@@ -81,4 +83,35 @@ private:
 
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
+
+  uint64_t time_ms_ {};
+
+  // pending datagrams
+  std::unordered_map<uint32_t, std::vector<EthernetFrame>> datagrams_ {};
+
+  // time of last arp requests
+  std::unordered_map<uint32_t, uint64_t> arp_request_time_ {};
+
+  // cached arp
+  std::unordered_map<uint32_t, EthernetAddress> arp_cache_ {};
+
+  // time of arp reply
+  std::queue<std::pair<uint64_t, uint32_t>> arp_mapping_time_ {};
+
+  // helpers to send arp request and reply
+  inline void _transmit_arp(uint64_t op, uint32_t dst_ip, EthernetAddress dst_addr, EthernetAddress header_addr) {
+    ARPMessage arp;
+    arp.opcode = op;
+    arp.sender_ip_address = ip_address_.ipv4_numeric();
+    arp.sender_ethernet_address = ethernet_address_;
+    arp.target_ip_address = dst_ip;
+    arp.target_ethernet_address = dst_addr;
+    transmit({{header_addr, ethernet_address_, EthernetHeader::TYPE_ARP}, serialize(arp)});
+  }
+  inline void transmit_arp(uint32_t dst_ip) {
+    _transmit_arp(ARPMessage::OPCODE_REQUEST, dst_ip, {}, ETHERNET_BROADCAST);
+  }
+  inline void transmit_arp(uint32_t dst_ip, EthernetAddress dst_addr) {
+    _transmit_arp(ARPMessage::OPCODE_REPLY, dst_ip, dst_addr, dst_addr);
+  }
 };
