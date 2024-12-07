@@ -38,13 +38,15 @@ void NetworkInterface::send_datagram( const InternetDatagram& dgram, const Addre
     frame.header.dst = dstAddr;
     transmit(frame);
   } else {
-    auto [it, succ] = arp_request_time_.try_emplace(next_hop.ipv4_numeric(), time_ms_);
-    if (succ || it->second + 5000 < time_ms_) {
-      transmit_arp(next_hop.ipv4_numeric());
-      it->second = time_ms_;
-    }
+    // XXX might a bug of the test framework
+    // call transmit on return
     // append dgram to queue
     datagrams_[next_hop.ipv4_numeric()].push_back(std::move(frame));
+    auto [it, succ] = arp_request_time_.try_emplace(next_hop.ipv4_numeric(), time_ms_);
+    if (succ || it->second + 5000 < time_ms_) {
+      it->second = time_ms_;
+      transmit_arp(next_hop.ipv4_numeric());
+    }
   }
 }
 
