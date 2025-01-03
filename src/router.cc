@@ -36,8 +36,8 @@ void Router::route()
       auto &dgram = queue.front();
       bool match = false;
       uint32_t mask = 0;
-      uint32_t next_hop;
-      size_t forward_interface;
+      uint32_t next_hop = 0;
+      size_t forward_interface = 0;
       uint32_t dst = dgram.header.dst;
       if (dgram.header.ttl <= 1) goto drop;
       --dgram.header.ttl;
@@ -51,12 +51,12 @@ void Router::route()
         }
       }
       if (match) {
-        cerr << "routing from " << i->name() << " to " << interface(forward_interface)->name() <<
-          " next_hop=" << Address::from_ipv4_numeric(next_hop).to_string() << " type=" << dgram.header.to_string() << " payload=";
-        for (auto &payload : dgram.payload) {
-          cerr << payload << " ";
-        }
-        cerr << endl;
+        // cerr << "routing from " << i->name() << " to " << interface(forward_interface)->name() <<
+          // " next_hop=" << Address::from_ipv4_numeric(next_hop).to_string() << " type=" << dgram.header.to_string() << " payload.len=";
+        // for (auto &payload : dgram.payload) {
+        //   cerr << payload.length() << " ";
+        // }
+        // cerr << endl;
         interface(forward_interface)->send_datagram(dgram, Address::from_ipv4_numeric(next_hop));
       }
 drop:
